@@ -1,4 +1,4 @@
--- stolen from Nevermore Engine https://github.com/Quenty/NevermoreEngine/tree/main/src
+-- taken from Nevermore Engine https://github.com/Quenty/NevermoreEngine/tree/main/src
 
 local HttpService = game:GetService("HttpService")
 
