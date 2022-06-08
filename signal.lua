@@ -3,7 +3,7 @@
 local Signal = {}
 
 do
-    -- genv cache, makes everything slightly faster
+    -- localization
     local instance_new = Instance.new
     local coroutine_wrap = coroutine.wrap
     local table_clear = table.clear
