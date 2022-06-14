@@ -1,0 +1,65 @@
+local Signal = {}
+local Connection = {}
+
+Signal.__index = Signal
+Connection.__index = Connection
+
+-- localization
+
+local coroutine_running = coroutine.running
+local coroutine_yield = coroutine.yield
+local coroutine_resume = coroutine.resume
+local table_remove = table.remove
+local setmetatable = setmetatable
+
+--[[
+    Disconnects a connection
+]]
+
+function Connection:Disconnect()
+    self.Connected = false
+    table_remove(self._signal._connections, self._index)
+end
+
+
+--[[
+    Creates a new signal
+    @return Signal (table)
+]]
+
+function Signal.new()
+    local self = setmetatable({}, Signal)
+    self._connections = {}
+
+    return self
+end
+
+--[[
+    Fires the signal with the argument (...)
+]]
+
+function Signal:Fire(...)
+    for _, connection in next, self._connections do
+        coroutine_wrap(connection._handler)(...)
+    end
+end
+
+--[[
+    Creates a new connection
+    @return Connection (table)
+]]
+
+function Signal:Connect(handler)
+    local connection = setmetatable({}, Connection)
+    connection.Connected = true
+
+    connection._signal = self
+    connection._handler = handler
+    connection._index = #self._connections + 1
+
+    self._connections[connection._index] = connection
+
+    return connection
+end
+
+return Signal
