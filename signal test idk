@@ -9,6 +9,7 @@ Connection.__index = Connection
 local coroutine_running = coroutine.running
 local coroutine_yield = coroutine.yield
 local coroutine_resume = coroutine.resume
+local coroutine_wrap = coroutine.wrap
 local table_remove = table.remove
 local setmetatable = setmetatable
 
@@ -39,8 +40,11 @@ end
 ]]
 
 function Signal:Fire(...)
-    for _, connection in next, self._connections do
-        coroutine_wrap(connection._handler)(...)
+    local i, current = next(self._connections)
+      
+    while current do
+        coroutine_wrap(current._handler)(...)
+        i, current = next(self._connections, i)
     end
 end
 
