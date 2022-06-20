@@ -118,30 +118,4 @@ do
     end
 end
 
-local e = Instance.new("ScreenGui", game.CoreGui)
-local f = Instance.new("Frame", e)
-f.Size = UDim2.new(0, 300, 0, 300)
-local r = Tween.new(f, {1, Tween.EasingStyle.Quad}, {Position = UDim2.new(0, 500, 0, 400)})
-local old = tick()
-r:Play()
-
-r.Completed:Connect(function()
-    print(tick() - old)
-    print(f.Position)
-end)
---[[
-local e = Drawing.new("Square")
-e.Visible = true
-e.Filled = true
-e.Thickness = 0
-e.Color = Color3.fromRGB(192, 185, 20)
-e.Size = Vector2.new(100, 100)
-e.Position = Vector2.new(0, 0)
-
-local r = Tween.new(e, 3, {Color = Color3.fromRGB(0, 255, 255)})
-r:Play()
-local old = tick()
-r.Completed:Wait()
-print(tick() - old)
-print(e.Color)
-e:Remove()]]
+return Tween
