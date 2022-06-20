@@ -43,7 +43,7 @@ do
     local render_stepped = game:GetService("RunService").RenderStepped
     local tick = tick
     local math_min = math.min
-    local task_spawn = task.spawn
+    local task_defer = task.defer
     local task_wait = task.wait
     local next = next
 
@@ -94,13 +94,13 @@ do
                 -- Do the chosen EasingStyle's math
                 local alpha = self._easingStyle(delta)
 
-                task_spawn(function()
+                task_defer(function()
                     self._object[property] = lerp(start_value, value, alpha)
                 end)
             end)
         end
 
-        task_spawn(function()
+        task_defer(function()
             task_wait(self._time)
 
             -- Sets every property
@@ -118,4 +118,30 @@ do
     end
 end
 
-return Tween
+local e = Instance.new("ScreenGui", game.CoreGui)
+local f = Instance.new("Frame", e)
+f.Size = UDim2.new(0, 300, 0, 300)
+local r = Tween.new(f, {1, Tween.EasingStyle.Quad}, {Position = UDim2.new(0, 500, 0, 400)})
+local old = tick()
+r:Play()
+
+r.Completed:Connect(function()
+    print(tick() - old)
+    print(f.Position)
+end)
+--[[
+local e = Drawing.new("Square")
+e.Visible = true
+e.Filled = true
+e.Thickness = 0
+e.Color = Color3.fromRGB(192, 185, 20)
+e.Size = Vector2.new(100, 100)
+e.Position = Vector2.new(0, 0)
+
+local r = Tween.new(e, 3, {Color = Color3.fromRGB(0, 255, 255)})
+r:Play()
+local old = tick()
+r.Completed:Wait()
+print(tick() - old)
+print(e.Color)
+e:Remove()]]
