@@ -6,7 +6,7 @@
 local Signal = loadstring(game:HttpGet("https://raw.githubusercontent.com/vozoid/utility/main/Signal.lua"))()
 
 --[[
-    Easing styles math: https://www.desmos.com/calculator/m8myals511
+    Easing styles math: https://www.desmos.com/calculator/m8myals511 (i didnt make the graphs)
     Add more EasingStyles by doing this:
     Convert the Out math (Blue icon) (example: 1.001 · -2⁻¹⁰ˣ + 1 to something like
     {name} = function(delta)
