@@ -132,37 +132,36 @@ do
     ]]
 
     function Tween:Play()
-        local loops = {}
+        local finished = false
 
         -- Loop through every property to edit
         for property, value in next, self._values do
             local start_time = tick()
             local start_value = self._object[property]
-            local stopped = false
 
-            loops[#loops + 1] = render_stepped:Connect(function()
-                local delta = (tick() - start_time) / self._time
+            task_defer(function()
+                while not finished do
+                    local delta = (tick() - start_time) / self._time
 
-                -- Do the chosen EasingStyle's math
-                local alpha = self._easingStyle(delta)
+                    -- Do the chosen EasingStyle's math
+                    local alpha = self._easingStyle(delta)
 
-                task_defer(function()
-                    self._object[property] = lerp(start_value, value, alpha)
-                end)
+                    task_defer(function()
+                        self._object[property] = lerp(start_value, value, alpha)
+                    end)
+
+                    render_stepped:Wait()
+                end
             end)
         end
 
         task_defer(function()
             task_wait(self._time)
+            finished = true
 
             -- Sets every property
             for property, value in next, self._values do
                 self._object[property] = value
-            end
-
-            -- Disconnects every loop
-            for _, connection in next, loops do
-                connection:Disconnect()
             end
 
             self.Completed:Fire()
