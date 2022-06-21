@@ -1,5 +1,5 @@
 --[[
-    Custom tween, usually gets time off by around 0.002 seconds
+    Custom tween
     Works with drawing objects
 ]]
 
@@ -51,7 +51,7 @@ do
         end,
 
         [Enum.EasingStyle.Circular] = function(delta)
-            return -math.sqrt(1 - (delta ^ 2)) + 1
+            return -math_sqrt(1 - (delta ^ 2)) + 1
         end,
 
         [Enum.EasingStyle.Sine] = function(delta)
