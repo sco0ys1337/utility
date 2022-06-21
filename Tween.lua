@@ -6,37 +6,15 @@
 local Signal = loadstring(game:HttpGet("https://raw.githubusercontent.com/vozoid/utility/main/Signal.lua"))()
 
 --[[
-    Easing styles math: https://www.desmos.com/calculator/m8myals511 (i didnt make the graphs)
+    Easing styles math: https://www.desmos.com/calculator/m8myals511
     Add more EasingStyles by doing this:
-    Convert the Out math (Blue icon) (example: 1.001 · -2⁻¹⁰ˣ + 1 to something like
+    Convert the math (example: 1.001 · -2⁻¹⁰ˣ + 1 to something like
     {name} = function(delta)
         return 1.001 * (-2 ^ (-10 * delta)) + 1
     end
 ]]
 
-local Tween = {
-    EasingStyle = {
-        Linear = function(delta)
-            return delta
-        end,
-
-        Exponential = function(delta)
-            return 1.001 * (-2 ^ (-10 * delta)) + 1
-        end,
-
-        Quad = function(delta)
-            return -(delta - 1) ^ 2 + 1
-        end,
-
-        Quart = function(delta)
-            return -(delta - 1) ^ 4 + 1
-        end,
-
-        Quint = function(delta)
-            return (delta - 1) ^ 5 + 1
-        end
-    }
-}
+local Tween = {}
 
 do
     -- Localization
@@ -46,6 +24,79 @@ do
     local task_defer = task.defer
     local task_wait = task.wait
     local next = next
+    local math_sqrt = math.sqrt
+    local math_sin = math.sin
+    local pi = math.pi
+
+    -- All the math for the different EasingStyles with the EasingDirection In
+    Tween[Enum.EasingDirection.In] = {
+        [Enum.EasingStyle.Linear] = function(delta)
+            return delta
+        end,
+
+        [Enum.EasingStyle.Exponential] = function(delta)
+            return (2 ^ (10 * delta - 10)) - 0.001
+        end,
+
+        [Enum.EasingStyle.Quad] = function(delta)
+            return delta ^ 2
+        end,
+
+        [Enum.EasingStyle.Quart] = function(delta)
+            return delta ^ 4
+        end,
+
+        [Enum.EasingStyle.Quint] = function(delta)
+            return delta ^ 5
+        end,
+
+        [Enum.EasingStyle.Circular] = function(delta)
+            return -math.sqrt(1 - (delta ^ 2)) + 1
+        end,
+
+        [Enum.EasingStyle.Sine] = function(delta)
+            return math_sin(((pi / 2) * delta) - (pi / 2)) + 1
+        end,
+
+        [Enum.EasingStyle.Cubic] = function(delta)
+            return delta ^ 3
+        end
+    }
+
+    -- All the math for the different EasingStyles with the EasingDirection Out
+    Tween[Enum.EasingDirection.Out] = {
+        [Enum.EasingStyle.Linear] = function(delta)
+            return delta
+        end,
+
+        [Enum.EasingStyle.Exponential] = function(delta)
+            return 1.001 * (-2 ^ (-10 * delta)) + 1
+        end,
+
+        [Enum.EasingStyle.Quad] = function(delta)
+            return -(delta - 1) ^ 2 + 1
+        end,
+
+        [Enum.EasingStyle.Quart] = function(delta)
+            return -(delta - 1) ^ 4 + 1
+        end,
+
+        [Enum.EasingStyle.Quint] = function(delta)
+            return (delta - 1) ^ 5 + 1
+        end,
+
+        [Enum.EasingStyle.Circular] = function(delta)
+            return math_sqrt((-(delta - 1) ^ 2) + 1)
+        end,
+
+        [Enum.EasingStyle.Sine] = function(delta)
+            return math_sin((pi / 2) * delta)
+        end,
+
+        [Enum.EasingStyle.Cubic] = function(delta)
+            return ((delta - 1) ^ 3) + 1
+        end
+    }
 
     Tween.__index =  Tween
 
@@ -68,8 +119,9 @@ do
 
         self.Completed = Signal.new()
         self._object = object
-        self._time = info[1]
-        self._easingStyle = info[2] or Tween.EasingStyle.Linear
+        self._time = info.Time or 0.1
+        self._easingDirection = info.EasingDirection
+        self._easingStyle = Tween[self._easingDirection][info.EasingStyle]
         self._values = values
 
         return self
