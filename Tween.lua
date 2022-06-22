@@ -28,6 +28,10 @@ do
     local math_sin = math.sin
     local pi = math.pi
 
+    local function check(number, min, max)
+        return number >= min and number <= max
+    end
+
     -- All the math for the different EasingStyles with the EasingDirection In
     Tween[Enum.EasingDirection.In] = {
         [Enum.EasingStyle.Linear] = function(delta)
@@ -60,6 +64,18 @@ do
 
         [Enum.EasingStyle.Cubic] = function(delta)
             return delta ^ 3
+        end,
+
+        [Enum.EasingStyle.Bounce] = function(delta)
+            if check(delta, 0, 0.25 / 2.75) then
+                return -7.5625 * (1 - delta - (2.625 / 2.75)) ^ 2 + 0.015625
+            elseif check(delta, 0.25 / 2.75, 0.75 / 2.75) then
+                return -7.5625 * (1 - delta - (2.25 / 2.75)) ^ 2 + 0.0625
+            elseif check(delta, 0.75 / 2.75, 1.75 / 2.75) then
+                return -7.5625 * (1 - delta - (1.5 / 2.75)) ^ 2 + 0.25
+            else
+                return 1 - 7.5625 * (1 - delta) ^ 2
+            end
         end
     }
 
@@ -95,6 +111,18 @@ do
 
         [Enum.EasingStyle.Cubic] = function(delta)
             return ((delta - 1) ^ 3) + 1
+        end,
+        
+        [Enum.EasingStyle.Bounce] = function(delta)
+            if check(delta, 0, 1 / 2.75) then
+                return 7.5625 * (delta ^ 2)
+            elseif check(delta, 1 / 2.75, 2 / 2.75) then
+                return 7.5625 * (delta - (1.5 / 2.75)) ^ 2 + 0.75
+            elseif check(delta, 2 / 2.75, 2.5 / 2.75) then
+                return 7.5625 * (delta - (2.25 / 2.75)) ^ 2 + 0.9375
+            else
+                return 7.5625 * (delta - (2.625 / 2.75)) ^ 2 + 0.984375
+            end
         end
     }
 
