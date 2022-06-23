@@ -1,6 +1,7 @@
 -- made by vozoid B)
 
 local Signal = {}
+local Connection = {}
 
 do
     -- localization
@@ -8,8 +9,39 @@ do
     local coroutine_wrap = coroutine.wrap
     local table_clear = table.clear
     local setmetatable = setmetatable
+    local table_remove = table.remove
 
     Signal.__index = Signal
+    Connection.__index = Connection
+
+    --[[
+        Creates a new connection
+        @return Connection (table)
+    ]]
+
+    function Connection.new(event, callback)
+        local self = setmetatable({}, Connection)
+
+        self.Connected = true
+        self._connection = event._event:Connect(callback)
+        self._connection_index = #event._connections + 1
+        self._event = event
+
+        event._connections[#event._connections + 1] = self._connection
+
+        return self
+    end
+
+    --[[
+        Disconnects a connection
+    ]]
+
+    function Connection:Disconnect()
+        table_remove(self._event._connections, self._connection_index)
+        self.Connected = false
+
+        self._connection:Disconnect()
+    end
 
     --[[
         Creates a new signal
@@ -36,15 +68,11 @@ do
 
     --[[
         Create a new connection. Returns a connection which can be disconnected. Callback called when :Fire(...) is called
-        @return RBXScriptConnection
+        @return Connection (table)
     ]]
 
     function Signal:Connect(callback)
-        local connection = self._event:Connect(callback)
-
-        -- Add connection to the connections table
-        self._connections[connection] = true
-
+        local connection = Connection.new(self, callback)
         return connection
     end
 
@@ -61,7 +89,7 @@ do
     ]]
 
     function Signal:DisconnectAll()
-        for connection, _ in next, self._connections do
+        for _, connection in next, self._connections do
             -- Check if connection hasnt been disconnected
             if connection.Connected then
                 -- Disconnects connection
