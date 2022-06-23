@@ -73,7 +73,7 @@ end
 ]]
 
 function List:RemoveObject(removed_object)
-    local size = removed_object.Size.Y + self._padding
+    local size = get_render_property(removed_object, "Size").Y + self._padding
     local idx = self._objectIndexes[removed_object]
 
     for i, object in next, self._objects do
