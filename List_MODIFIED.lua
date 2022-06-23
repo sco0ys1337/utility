@@ -73,13 +73,14 @@ end
 ]]
 
 function List:RemoveObject(removed_object)
-    local size = get_render_property(removed_object, "Size").Y + self._padding
+    local size = get_render_property(removed_object, "Size").Y
     local idx = self._objectIndexes[removed_object]
 
     for i, object in next, self._objects do
         if i > idx then
             self._objectIndexes[object] -= 1
-            set_render_property(object, "Position", get_render_property(object, "Position") - vector2_new(0, size))
+            self._objectPositions[object] -= (size + self._padding)
+            set_render_property(object, "Position", self._position + vector2_new(0, self._objectPositions[object]))
         end
     end
 
@@ -105,7 +106,7 @@ function List:UpdateObject(updated_object)
     for i, object in next, self._objects do
         if i > idx then
             self._objectPositions[object] += difference
-            set_render_property(object, "Position", get_render_property(object, "Position") + vector2_new(0, difference))
+            set_render_property(object, "Position", self._position + vector2_new(0, self._objectPositions[object]))
         end
     end
 
@@ -124,6 +125,7 @@ function List:UpdatePosition(position)
         set_render_property(object, "Position", position + vector2_new(0, self._objectPositions[object]))
     end
     
+    self.Updated:Fire(self.AbsoluteContentSize)
     self._position = position
 end
 
@@ -143,6 +145,7 @@ function List:UpdatePadding(padding)
         end
     end
 
+    self.Updated:Fire(self.AbsoluteContentSize)
     self._padding = padding
 end
 
