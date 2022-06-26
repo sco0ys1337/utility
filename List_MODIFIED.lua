@@ -1,8 +1,8 @@
-local Signal = loadstring(game:HttpGet("https://raw.githubusercontent.com/vozoid/utility/main/Signal.lua"))()
-
 --[[
     Drawing api list stuff idk
 ]]
+
+local Signal = loadstring(game:HttpGet("https://raw.githubusercontent.com/vozoid/utility/main/Signal.lua"))()
 
 local List = {}
 List.__index = List
@@ -38,6 +38,7 @@ function List.new(position, padding)
     self._objects = {}
     self._objectIndexes = {}
     self._objectSizes = {}
+    self._objectQueues = {}
 
     return self
 end
@@ -47,25 +48,26 @@ end
 ]]
 
 function List:AddObject(object)
-    if type(object) == "table" then
-        object = rawget(object, "__OBJECT")
+    if object._class == "Square" or object._class == "Image" then
+        object = object._render
+        
+        local size = get_render_property(object, "Size").Y
+
+        local idx = #self._objects + 1
+        local padding = #self._objects * self._padding
+        local position = self.AbsoluteContentSize + padding
+
+        set_render_property(object, "Position", self._position + vector2_new(0, position))
+
+        self._objects[idx] = object
+        self._objectPositions[object] = position
+        self._objectIndexes[object] = idx
+        self._objectSizes[object] = size
+        self._objectQueues[object] = {}
+
+        self.AbsoluteContentSize += size
+        self.Updated:Fire(self.AbsoluteContentSize)
     end
-    
-    local size = get_render_property(object, "Size").Y
-
-    local idx = #self._objects + 1
-    local padding = #self._objects * self._padding
-    local position = self.AbsoluteContentSize + padding
-
-    set_render_property(object, "Position", self._position + vector2_new(0, position))
-
-    self._objects[idx] = object
-    self._objectPositions[object] = position
-    self._objectIndexes[object] = idx
-    self._objectSizes[object] = size
-
-    self.AbsoluteContentSize += size
-    self.Updated:Fire(self.AbsoluteContentSize)
 end
 
 --[[
@@ -122,7 +124,11 @@ end
 
 function List:UpdatePosition(position)
     for i, object in next, self._objects do
-        set_render_property(object, "Position", position + vector2_new(0, self._objectPositions[object]))
+        if get_render_property(object, "Visible") then
+            set_render_property(object, "Position", position + vector2_new(0, self._objectPositions[object]))
+        else
+            self._objectQueues[object].Position = position + vector2_new(0, self._objectPositions[object])
+        end
     end
     
     self.Updated:Fire(self.AbsoluteContentSize)
