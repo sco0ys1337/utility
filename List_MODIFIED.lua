@@ -48,16 +48,21 @@ end
 ]]
 
 function List:AddObject(object)
-    if object._class == "Square" or object._class == "Image" then
-        object = object._render
-        
-        local size = get_render_property(object, "Size").Y
+    if object._class == "Square" or object._class == "Image" then        
+        local size = object.AbsoluteSize.Y
 
         local idx = #self._objects + 1
         local padding = #self._objects * self._padding
         local position = self.AbsoluteContentSize + padding
 
-        set_render_property(object, "Position", self._position + vector2_new(0, position))
+        local new_position = self._position + vector2_new(0, position)
+        object._properties.AbsolutePosition = new_position
+
+        set_render_property(object._render, "Position", new_position)
+
+        if object._outline then
+            set_render_property(object._outline, "Position", object.AbsolutePosition - vector2_new(1, 1))
+        end
 
         self._objects[idx] = object
         self._objectPositions[object] = position
@@ -82,7 +87,7 @@ function List:RemoveObject(removed_object)
         if i > idx then
             self._objectIndexes[object] -= 1
             self._objectPositions[object] -= (size + self._padding)
-            set_render_property(object, "Position", self._position + vector2_new(0, self._objectPositions[object]))
+            set_render_property(object._render, "Position", self._position + vector2_new(0, self._objectPositions[object]))
         end
     end
 
@@ -97,22 +102,25 @@ end
 ]]
 
 function List:UpdateObject(updated_object)
-    if type(updated_object) == "table" then
-        updated_object = rawget(updated_object, "__OBJECT")
-    end
-
     -- Gets the difference between the new size and the old size of the object
-    local difference = get_render_property(updated_object, "Size").Y - self._objectSizes[updated_object]
+    local difference = updated_object.AbsoluteSize.Y - self._objectSizes[updated_object]
     local idx = self._objectIndexes[updated_object]
 
     for i, object in next, self._objects do
         if i > idx then
             self._objectPositions[object] += difference
-            set_render_property(object, "Position", self._position + vector2_new(0, self._objectPositions[object]))
+            local new_position = self._position + vector2_new(0, self._objectPositions[object])
+            object._properties.AbsolutePosition = new_position
+
+            set_render_property(object, "Position", new_position)
+
+            if object._outline then
+                set_render_property(object._outline, "Position", object.AbsolutePosition - vector2_new(1, 1))
+            end
         end
     end
 
-    self._objectSizes[updated_object] = get_render_property(updated_object, "Size").Y 
+    self._objectSizes[updated_object] = updated_object.AbsoluteSize.Y 
 
     self.AbsoluteContentSize += difference
     self.Updated:Fire(self.AbsoluteContentSize)
@@ -123,11 +131,18 @@ end
 ]]
 
 function List:UpdatePosition(position)
-    for i, object in next, self._objects do
-        if get_render_property(object, "Visible") then
-            set_render_property(object, "Position", position + vector2_new(0, self._objectPositions[object]))
+    for _, object in next, self._objects do
+        if object.AbsoluteVisible then
+            local new_position = position + vector2_new(0, self._objectPositions[object])
+            object._properties.AbsolutePosition = new_position
+
+            set_render_property(object._render, "Position", new_position)
+
+            if object._outline then
+                set_render_property(object._outline, "Position", object.AbsolutePosition - vector2_new(1, 1))
+            end
         else
-            self._objectQueues[object].Position = position + vector2_new(0, self._objectPositions[object])
+            object._queue.Position = position + vector2_new(0, self._objectPositions[object])
         end
     end
     
@@ -154,5 +169,3 @@ function List:UpdatePadding(padding)
     self.Updated:Fire(self.AbsoluteContentSize)
     self._padding = padding
 end
-
-return List
