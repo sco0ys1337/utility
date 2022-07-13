@@ -27,18 +27,6 @@ do
     local math_sqrt = math.sqrt
     local math_sin = math.sin
     local pi = math.pi
-    local rawget = rawget
-    local type = type
-
-    -- Variables
-
-    local set_render_property = islclosure(Drawing.new) and getupvalue(getupvalue(Drawing.new, 4).__newindex, 4) or setrenderproperty or function(object, property, value)
-        object[property] = value
-    end
-
-    local get_render_property = islclosure(Drawing.new) and getupvalue(getupvalue(Drawing.new, 4).__index, 4) or getrenderproperty or function(object, property)
-        return object[property]
-    end
 
     local function check(number, min, max)
         return number >= min and number <= max
@@ -155,10 +143,6 @@ do
     ]]
 
     function Tween.new(object, info, values)
-        if type(object) == "table" then
-            object = rawget(object, "__OBJECT")
-        end
-
         local self = setmetatable({}, Tween)
 
         self.Completed = Signal.new()
@@ -181,7 +165,7 @@ do
         -- Loop through every property to edit
         for property, value in next, self._values do
             local start_time = tick()
-            local start_value = get_render_property(self._object, property)
+            local start_value = self._object[property]
 
             task_defer(function()
                 while not finished do
@@ -191,7 +175,7 @@ do
                     local alpha = self._easingStyle(delta)
 
                     task_defer(function()
-                        set_render_property(self._object, property, lerp(start_value, value, alpha))
+                        self._object[property] = lerp(start_value, value, alpha)
                     end)
 
                     render_stepped:Wait()
@@ -205,7 +189,7 @@ do
 
             -- Sets every property
             for property, value in next, self._values do
-                set_render_property(self._object, property, value)
+                self._object[property] = value
             end
 
             self.Completed:Fire()
