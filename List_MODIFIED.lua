@@ -1,3 +1,4 @@
+
 --[[
     Drawing api list stuff idk
 ]]
@@ -52,8 +53,7 @@ function List:AddObject(object)
         local size = object.AbsoluteSize.Y
 
         local idx = #self._objects + 1
-        local padding = #self._objects * self._padding
-        local position = self.AbsoluteContentSize + padding
+        local position = self.AbsoluteContentSize
 
         local new_position = self._position + vector2_new(0, position)
         object._properties.AbsolutePosition = new_position
@@ -70,7 +70,8 @@ function List:AddObject(object)
         self._objectSizes[object] = size
         self._objectQueues[object] = {}
 
-        self.AbsoluteContentSize += size + padding
+        self.AbsoluteContentSize += size + self._padding
+        print(self.AbsoluteContentSize)
         self.Updated:Fire(self.AbsoluteContentSize)
     end
 end
