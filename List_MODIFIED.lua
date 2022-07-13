@@ -70,7 +70,7 @@ function List:AddObject(object)
         self._objectSizes[object] = size
         self._objectQueues[object] = {}
 
-        self.AbsoluteContentSize += size
+        self.AbsoluteContentSize += size + padding
         self.Updated:Fire(self.AbsoluteContentSize)
     end
 end
