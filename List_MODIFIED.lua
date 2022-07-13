@@ -169,3 +169,5 @@ function List:UpdatePadding(padding)
     self.Updated:Fire(self.AbsoluteContentSize)
     self._padding = padding
 end
+
+return List
