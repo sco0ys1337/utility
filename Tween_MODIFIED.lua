@@ -205,7 +205,7 @@ do
 
             -- Sets every property
             for property, value in next, self._values do
-                set_render_property(self.__object, property, value)
+                set_render_property(self._object, property, value)
             end
 
             self.Completed:Fire()
