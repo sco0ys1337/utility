@@ -147,6 +147,7 @@ do
 
         self.Completed = Signal.new()
         self._object = object
+        self._cancelled = false
         self._time = info.Time or 0.1
         self._easingDirection = info.EasingDirection
         self._easingStyle = Tween[self._easingDirection][info.EasingStyle]
@@ -168,7 +169,7 @@ do
             local start_value = self._object[property]
 
             task_defer(function()
-                while not finished do
+                while not finished and not self._cancelled do
                     local delta = (tick() - start_time) / self._time
 
                     -- Do the chosen EasingStyle's math
@@ -188,12 +189,23 @@ do
             finished = true
 
             -- Sets every property
-            for property, value in next, self._values do
-                self._object[property] = value
-            end
+            if not self._cancelled then
+                for property, value in next, self._values do
+                    self._object[property] = value
+                end
 
-            self.Completed:Fire()
+                self.Completed:Fire()
+            end
         end)
+    end
+
+    --[[
+        Cancel a tween
+    ]]
+
+    function Tween:Cancel()
+        self._cancelled = true
+        self.Completed:Fire()
     end
 end
 
