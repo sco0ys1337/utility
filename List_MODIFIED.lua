@@ -1,4 +1,3 @@
-
 --[[
     Drawing api list stuff idk
 ]]
@@ -58,10 +57,14 @@ function List:AddObject(object)
         local new_position = self._position + vector2_new(0, position)
         object._properties.AbsolutePosition = new_position
 
-        set_render_property(object._render, "Position", new_position)
+        if object.AbsoluteVisible then
+            set_render_property(object._render, "Position", new_position)
 
-        if object._outline then
-            set_render_property(object._outline, "Position", object.AbsolutePosition - vector2_new(1, 1))
+            if object._outline then
+                set_render_property(object._outline, "Position", object.AbsolutePosition - vector2_new(1, 1))
+            end
+        else
+            object._queue.Position = new_position
         end
 
         self._objects[idx] = object
@@ -71,7 +74,6 @@ function List:AddObject(object)
         self._objectQueues[object] = {}
 
         self.AbsoluteContentSize += size + self._padding
-        print(self.AbsoluteContentSize)
         self.Updated:Fire(self.AbsoluteContentSize)
     end
 end
@@ -88,7 +90,13 @@ function List:RemoveObject(removed_object)
         if i > idx then
             self._objectIndexes[object] -= 1
             self._objectPositions[object] -= (size + self._padding)
-            set_render_property(object._render, "Position", self._position + vector2_new(0, self._objectPositions[object]))
+
+            local new_position = self._position + vector2_new(0, self._objectPositions[object])
+            if object.AbsoluteVisible then
+                set_render_property(object._render, "Position", new_position)
+            else
+                object._queue.Position = new_position
+            end
         end
     end
 
@@ -113,10 +121,14 @@ function List:UpdateObject(updated_object)
             local new_position = self._position + vector2_new(0, self._objectPositions[object])
             object._properties.AbsolutePosition = new_position
 
-            set_render_property(object, "Position", new_position)
+            if object.AbsoluteVisible then
+                set_render_property(object, "Position", new_position)
 
-            if object._outline then
-                set_render_property(object._outline, "Position", object.AbsolutePosition - vector2_new(1, 1))
+                if object._outline then
+                    set_render_property(object._outline, "Position", object.AbsolutePosition - vector2_new(1, 1))
+                end
+            else
+                object._queue.Position = new_position
             end
         end
     end
@@ -133,17 +145,17 @@ end
 
 function List:UpdatePosition(position)
     for _, object in next, self._objects do
-        if object.AbsoluteVisible then
-            local new_position = position + vector2_new(0, self._objectPositions[object])
-            object._properties.AbsolutePosition = new_position
+        local new_position = position + vector2_new(0, self._objectPositions[object])
+        object._properties.AbsolutePosition = new_position
 
+        if object.AbsoluteVisible then
             set_render_property(object._render, "Position", new_position)
 
             if object._outline then
                 set_render_property(object._outline, "Position", object.AbsolutePosition - vector2_new(1, 1))
             end
         else
-            object._queue.Position = position + vector2_new(0, self._objectPositions[object])
+            object._queue.Position = new_position
         end
     end
     
@@ -163,7 +175,12 @@ function List:UpdatePadding(padding)
         if i > 1 then
             local added = (i - 1) * difference
             self._objectPositions[object] += added
-            set_render_property(object, "Position", get_render_property(object, "Position") + vector2_new(0, added))
+            local new_position = object.AbsolutePosition + vector2_new(0, added)
+            if object.AbsoluteVisible then
+                set_render_property(object, "Position", new_position)
+            else
+                object._queue = new_position
+            end
         end
     end
 
