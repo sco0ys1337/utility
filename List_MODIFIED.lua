@@ -81,7 +81,7 @@ end
 ]]
 
 function List:RemoveObject(removed_object)
-    local size = get_render_property(removed_object, "Size").Y
+    local size = removed_object.AbsoluteSize.Y
     local idx = self._objectIndexes[removed_object]
 
     for i, object in next, self._objects do
