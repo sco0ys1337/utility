@@ -1,5 +1,16 @@
 -- https://github.com/Quenty/NevermoreEngine/blob/version2/Modules/Shared/Events/Maid.lua
 
+-- Localization
+local setmetatable = setmetatable
+local type = type
+local typeof = typeof
+local error = error
+local tostring = tostring
+local warn = warn
+local traceback = debug.traceback
+local pairs = pairs
+local next = next
+
 ---	Manages the cleaning of events and other things.
 -- Useful for encapsulating state and make deconstructors easy
 -- @classmod Maid
@@ -77,7 +88,7 @@ function Maid:GiveTask(task)
 	self[taskId] = task
 
 	if type(task) == "table" and (not task.Destroy) then
-		warn("[Maid.GiveTask] - Gave table task without .Destroy\n\n" .. debug.traceback())
+		warn("[Maid.GiveTask] - Gave table task without .Destroy\n\n" .. traceback())
 	end
 
 	return taskId
