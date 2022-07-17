@@ -24,10 +24,9 @@ do
 
         self.Connected = true
         self._connection = event._event:Connect(callback)
-        self._connection_index = #event._connections + 1
         self._event = event
 
-        event._connections[#event._connections + 1] = self._connection
+        event._connections[self._connection] = true
 
         return self
     end
@@ -37,7 +36,9 @@ do
     ]]
 
     function Connection:Disconnect()
-        table_remove(self._event._connections, self._connection_index)
+        self._event._connections[self._connection] = nil
+        self._event._count -= 1
+
         self.Connected = false
 
         self._connection:Disconnect()
@@ -53,6 +54,7 @@ do
 
         self._bindable_event = instance_new("BindableEvent")
         self._event = self._bindable_event.Event
+        self._count = 0
         self._connections = {}
 
         return self
@@ -73,6 +75,7 @@ do
 
     function Signal:Connect(callback)
         local connection = Connection.new(self, callback)
+        self._count += 1
         return connection
     end
 
@@ -89,7 +92,7 @@ do
     ]]
 
     function Signal:DisconnectAll()
-        for _, connection in next, self._connections do
+        for connection, _ in next, self._connections do
             -- Check if connection hasnt been disconnected
             if connection.Connected then
                 -- Disconnects connection
