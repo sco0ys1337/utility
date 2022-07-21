@@ -3,6 +3,7 @@ local typeof = typeof
 local next = next
 
 local Maid = {}
+Maid.__index = Maid
 
 function Maid.new()
 	return setmetatable({
@@ -13,7 +14,7 @@ end
 function Maid:GiveTask(task)
 	local class = typeof(task)
 
-	if class ~= "Instance" and class ~= "RBXScriptConnection" and (class ~= "table" or not class.Disconnect) then
+	if class ~= "Instance" and class ~= "RBXScriptConnection" and (class ~= "table" or not task.Disconnect) then
 		return
 	end
 
