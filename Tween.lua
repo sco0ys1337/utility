@@ -5,6 +5,7 @@ local sqrt, sin, pi, halfpi, doublepi = math.sqrt, math.sin, math.pi, math.pi / 
 local defer = task.defer
 local next = next
 local type = type
+local setmetatable = setmetatable
 local wait = task.wait
 
 -- random variables for easing styles idk
