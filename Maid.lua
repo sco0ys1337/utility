@@ -18,7 +18,7 @@ function Maid:GiveTask(task)
 		return
 	end
 
-    	self._tasks[task] = true
+	self._tasks[task] = true
 end
 
 function Maid:RemoveTask(task)
