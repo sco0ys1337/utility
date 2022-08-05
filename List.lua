@@ -1,4 +1,4 @@
--- custom UIListLayout
+-- custom UIListLayout, u can modify with Vector2 if u want it to work with drawing lib
 
 local remove = table.remove
 local setmetatable = setmetatable
