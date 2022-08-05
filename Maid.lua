@@ -1,3 +1,5 @@
+-- maid  lib, u might as well use the one from nevermore
+
 local setmetatable = setmetatable
 local typeof = typeof
 local next = next
