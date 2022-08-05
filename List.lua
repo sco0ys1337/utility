@@ -1,131 +1,76 @@
-local Signal = loadstring(game:HttpGet("https://raw.githubusercontent.com/vozoid/utility/main/Signal.lua"))()
+-- custom UIListLayout
 
---[[
-    Drawing api list stuff idk
-]]
+local remove = table.remove
+local setmetatable = setmetatable
+local newUDim2 = UDim2.new
 
 local List = {}
 List.__index = List
 
--- Localization
-local typeof = typeof
-local table_remove = table.remove
-local vector2_new = Vector2.new
-
---[[
-    Creates a new list
-    @return List (table)
-]]
-
-function List.new(position, padding)
-    local self = setmetatable({}, List)
-
-    self.Updated = Signal.new()
-    self.AbsoluteContentSize = 0
-    self._padding = padding
-    self._position = position
-    self._objectPositions = {}
-    self._objects = {}
-    self._objectIndexes = {}
-    self._objectSizes = {}
-
-    return self
+function List.new(object, padding)
+    return setmetatable({
+        _contentSize = 0,
+        _padding = padding,
+        _positions = {},
+        _object = object,
+        _objects = {},
+        _indexes = {},
+        _sizes = {}
+    }, List)
 end
 
---[[
-    Adds an object to a list
-]]
+function List:GetAbsoluteContentSize()
+    return self._contentSize
+end
+
+List.GetContentSize = List.GetAbsoluteContentSize
 
 function List:AddObject(object)
-    local size = object.Size.Y
-
+    local size = object.AbsoluteSize.Y
     local idx = #self._objects + 1
     local padding = #self._objects * self._padding
-    local position = self.AbsoluteContentSize + padding
+    local position = self._contentSize + padding
 
-    object.Position = self._position + vector2_new(0, position)
+    if object.Parent ~= self._object then
+        object.Parent = self._object
+    end
+
+    object.Position = newUDim2(0, 0, 0, position)
 
     self._objects[idx] = object
-    self._objectPositions[object] = position
-    self._objectIndexes[object] = idx
-    self._objectSizes[object] = size
+    self._positions[object] = position
+    self._indexes[object] = idx
+    self._sizes[object] = size
 
-    self.AbsoluteContentSize += size
-    self.Updated:Fire(self.AbsoluteContentSize)
+    self._contentSize += size
 end
 
---[[
-    Removes an object from the list
-]]
+function List:RemoveObject(object)
+    local size = self._sizes[object] + self._padding
+    local idx = self._indexes[object]
 
-function List:RemoveObject(removed_object)
-    local size = removed_object.Size.Y + self._padding
-    local idx = self._objectIndexes[removed_object]
-
-    for i, object in next, self._objects do
+    for i, obj in next, self._objects do
         if i > idx then
-            self._objectIndexes[object] -= 1
-            object.Position -= vector2_new(0, size)
+            self._indexes[obj] -= 1
+            obj.Position = newUDim2(0, 0, 0, self._positions[obj] - size)
         end
     end
 
-    table_remove(self._objects, idx)
-
-    self.AbsoluteContentSize -= size
-    self.Updated:Fire(self.AbsoluteContentSize)
+    remove(self._objects, idx)
+    self._contentSize -= size
 end
 
---[[
-    Updates the list based on the selected objects size
-]]
+function List:UpdateObject(object)
+    local diff = object.AbsoluteSize.Y - self._sizes[object]
+    local idx = self._indexes[object]
 
-function List:UpdateObject(updated_object)
-    -- Gets the difference between the new size and the old size of the object
-    local difference = updated_object.Size.Y - self._objectSizes[updated_object]
-    local idx = self._objectIndexes[updated_object]
-
-    for i, object in next, self._objects do
+    for i, obj in next, self._objects do
         if i > idx then
-            self._objectPositions[object] += difference
-            object.Position += vector2_new(0, difference)
+            self._positions[obj] += diff
+            obj.Position = newUDim2(0, 0, 0, self._positions[obj] + size)
         end
     end
 
-    self._objectSizes[updated_object] = updated_object.Size.Y
-
-    self.AbsoluteContentSize += difference
-    self.Updated:Fire(self.AbsoluteContentSize)
+    self._sizes[object] += diff
+    self._contentSize += difference
 end
-
---[[
-    Updates the position of the list
-]]
-
-function List:UpdatePosition(position)
-    for i, object in next, self._objects do
-        object.Position = position + vector2_new(0, self._objectPositions[object])
-    end
-    
-    self._position = position
-end
-
---[[
-    Updates the padding of the list
-]]
-
-function List:UpdatePadding(padding)
-    -- Gets the difference between the new padding and the old padding of the list
-    local difference = padding - self._padding
-
-    for i, object in next, self._objects do
-        if i > 1 then
-            local added = (i - 1) * difference
-            object.Position += vector2_new(0, added)
-            self._objectPositions[object] += added
-        end
-    end
-
-    self._padding = padding
-end
-
-return List
