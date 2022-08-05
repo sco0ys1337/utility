@@ -1,3 +1,5 @@
+-- small signal lib
+
 local newInstance = Instance.new
 local setmetatable = setmetatable
 
