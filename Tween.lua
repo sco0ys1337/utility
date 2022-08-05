@@ -1,3 +1,5 @@
+-- custom tween
+
 local Signal = loadstring(game:HttpGet("https://raw.githubusercontent.com/vozoid/utility/main/Signal.lua"))()
 
 local render = game:GetService("RunService").RenderStepped
