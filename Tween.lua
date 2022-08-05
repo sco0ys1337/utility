@@ -4,11 +4,10 @@ local Signal = loadstring(game:HttpGet("https://raw.githubusercontent.com/vozoid
 
 local render = game:GetService("RunService").RenderStepped
 local sqrt, sin, pi, halfpi, doublepi = math.sqrt, math.sin, math.pi, math.pi / 2, math.pi * 2
-local defer = task.defer
 local next = next
 local type = type
 local setmetatable = setmetatable
-local wait = task.wait
+local wait, spawn = task.wait, task.spawn
 
 -- random variables for easing styles idk
 local s = 1.70158
@@ -263,7 +262,7 @@ function Tween:Play()
     for property, value in next, self._properties do
         local start_value = self._object[property]
 
-        defer(function()
+        spawn(function()
             local elapsed = 0
             while elapsed <= self._time and not self._cancelled do            
                 local delta = elapsed / self._time
@@ -271,7 +270,7 @@ function Tween:Play()
                 -- Do the chosen EasingStyle's math
                 local alpha = self._easing(delta)
 
-                defer(function()
+                spawn(function()
                     self._object[property] = lerp(start_value, value, alpha)
                 end)
 
@@ -282,7 +281,7 @@ function Tween:Play()
         end)
     end
 
-    defer(function()
+    spawn(function()
         wait(self._time)
 
         if not self._cancelled then
