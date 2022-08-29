@@ -277,7 +277,9 @@ function Tween:Play()
                 elapsed += render:Wait()
             end
             
-            self._object[property] = value
+            if not self._cancelled then
+                self._object[property] = value
+            end
         end)
     end
 
