@@ -37,8 +37,13 @@ function Signal.new()
         Active = false,
         _bindableEvent = bindableEvent,
         _signal = bindableEvent.Event,
-        _count = 0
+        _count = 0,
+        _onConnects = {}
     }, Signal)
+end
+
+function Signal:OnConnect(callback)
+    self._onConnects[#self._onConnects + 1] = callback 
 end
 
 function Signal:Fire(...)
@@ -46,6 +51,10 @@ function Signal:Fire(...)
 end
 
 function Signal:Connect(callback)
+    for _, connect_callback in next, self._onConnects do
+        connect_callback()
+    end
+    
     return Connection.new(self, callback)
 end
 
@@ -61,5 +70,3 @@ end
 
 Signal.DisconnectAll = Signal.Destroy
 Signal.Disconnect = Signal.Destroy
-
-return Signal
