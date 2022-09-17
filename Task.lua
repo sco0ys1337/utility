@@ -1,4 +1,4 @@
--- custom task library (laggy)
+-- custom task library (laggy, but more accurate)
 
 local create, resume, wrap, running, yield, cancel = coroutine.create, coroutine.resume, coroutine.wrap, coroutine.running, coroutine.yield, coroutine.cancel
 local unpack = table.unpack
