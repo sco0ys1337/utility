@@ -4,31 +4,29 @@ local create, resume, wrap, running, yield, cancel = coroutine.create, coroutine
 local unpack = table.unpack
 local type = type
 local clock = os.clock
+local next = next
 local run_service = game:GetService("RunService")
 local render_stepped, heartbeat, stepped = run_service.RenderStepped, run_service.Heartbeat, run_service.Stepped
 
-local Task = {}
+local Task = {_yieldedThreads = {}}
+
+-- resumption cycle
+local function resume_threads()
+    local old = Task._yieldedThreads
+    Task._yieldedThreads = {}
+
+    for thread, _ in next, old do
+        resume(thread)
+    end
+end
+
+render_stepped:Connect(resume_threads)
+heartbeat:Connect(resume_threads)
+stepped:Connect(resume_threads)
 
 function wait_for_resumption()
-    local finished = false
     local thread = running()
-
-    local render_connection, heartbeat_connection, stepped_connection
-    
-    local function resume_thread()
-        if finished then
-            return
-        end
-
-        finished = true
-        resume(thread)
-
-        render_connection:Disconnect(); heartbeat_connection:Disconnect(); stepped_connection:Disconnect()
-    end
-    
-    render_connection = render_stepped:Connect(resume_thread)
-    heartbeat_connection = heartbeat:Connect(resume_thread)
-    stepped_connection = stepped:Connect(resume_thread)
+    Task._yieldedThreads[thread] = true
 
     yield()
 end
