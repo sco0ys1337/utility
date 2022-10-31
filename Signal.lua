@@ -70,3 +70,5 @@ end
 
 Signal.DisconnectAll = Signal.Destroy
 Signal.Disconnect = Signal.Destroy
+
+return Signal
